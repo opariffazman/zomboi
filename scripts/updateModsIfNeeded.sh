@@ -1,9 +1,9 @@
 #!/bin/bash
-screen -S zomboid -X stuff "checkModsNeedUpdate\n"
+echo "checkModsNeedUpdate" > /opt/pzserver/zomboid.control
 sleep 2
-if tail ~/Zomboid/Logs/*DebugLog-server.txt -n 1 | grep -q updated; then
+if tail $HOME/Zomboid/Logs/*DebugLog-server.txt -n 1 | grep -q updated; then
   echo 'false' # Mods are up to date
 else
   echo 'true' # Mods need update
-  ~/zomboi/scripts/startModsUpdate.sh
+  $HOME/zomboi/scripts/startModsUpdate.sh
 fi

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load environment variables from .env file
-source ~/zomboi/scripts/.env
+source $HOME/zomboi/scripts/.env
 
 send_discord_message() {
     local message="$1"
@@ -20,13 +20,13 @@ send_discord_message() {
 # Notify users that the server will be shutting down in 60 seconds
 echo "server will be shutting down in 60 seconds"
 send_discord_message "$NOTICE_MESSAGE" "$NOTICE_WEBHOOK"
-screen -S zomboid -X stuff "servermsg \"60 Seconds Remaining\"\n"
+echo "servermsg 60-secs-remaining" > /opt/pzserver/zomboid.control
 sleep 60
 
 # Notify users that the server is shutting down
 echo "server is shutting down"
 send_discord_message "$QUIT_MESSAGE" "$QUIT_WEBHOOK"
-screen -S zomboid -X stuff "quit\n"
+echo "quit" > /opt/pzserver/zomboid.control
 ZPID=$(pidof ProjectZomboid64)
 while [ -e /proc/$ZPID ]; do
     sleep 1
@@ -40,13 +40,13 @@ steamcmd +runscript $HOME/update_zomboid.txt
 # Notify users that the server is starting up
 echo "server is starting up"
 send_discord_message "$START_MESSAGE" "$START_WEBHOOK"
-screen -dmS zomboid /opt/pzserver/start-server.sh
+systemctl start zomboid.socket
 LOGS="RCON: listening on port 27015."
-LOG_TRUE=$(grep "$LOGS" ~/Zomboid/Logs/*DebugLog-server.txt)
+LOG_TRUE=$(grep "$LOGS" $HOME/Zomboid/Logs/*DebugLog-server.txt)
 
 while [ -z "$LOG_TRUE" ]; do
     sleep 1
-    LOG_TRUE=$(grep "$LOGS" ~/Zomboid/Logs/*DebugLog-server.txt)
+    LOG_TRUE=$(grep "$LOGS" $HOME/Zomboid/Logs/*DebugLog-server.txt)
 done
 
 # Notify users that the server is up and running
